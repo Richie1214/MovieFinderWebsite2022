@@ -1,0 +1,127 @@
+CREATE TABLE IF NOT EXISTS company (
+    company_id SERIAL PRIMARY KEY,
+    company_name VARCHAR(32) UNIQUE,
+    company_info VARCHAR(512),
+    company_url VARCHAR(64)
+);
+
+CREATE TABLE IF NOT EXISTS movie_user (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(32) UNIQUE NOT NULL,
+    user_password VARCHAR(64) NOT NULL,
+    email VARCHAR(32) UNIQUE NOT NULL,
+    real_name VARCHAR(64),
+    gender VARCHAR(32),
+    bio VARCHAR(256),
+    account_type VARCHAR(16),
+    verified BOOLEAN NOT NULL,
+    company BOOLEAN NOT NULL,
+    company_id int REFERENCES company,
+    last_online TIMESTAMP NOT NULL,
+    reviews_today int NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_links (
+    origin_user_id int REFERENCES movie_user,
+    link VARCHAR(128) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS movie_review (
+    review_id SERIAL PRIMARY KEY,
+    reviewer_id SERIAL REFERENCES movie_user,
+    review_content VARCHAR(512),
+    review_movie_source int NOT NULL,
+    review_rating int NOT NULL,
+    review_datetime TIMESTAMP NOT NULL,
+    review_edited BOOLEAN NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS company_post (
+    post_id SERIAL PRIMARY KEY,
+    company_id int REFERENCES company,
+    post_title VARCHAR(128) NOT NULL,
+    post_content VARCHAR(1024) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS review_links (
+    origin_review_id int REFERENCES movie_review,
+    link VARCHAR(128) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ban_list (
+    user_id SERIAL,
+    blocked_id SERIAL
+);
+
+CREATE TABLE IF NOT EXISTS movie (
+    movie_id SERIAL PRIMARY KEY,
+    movie_title VARCHAR(64) NOT NULL,
+    movie_details VARCHAR(512),
+    date_released DATE,
+    runtime TIME
+);
+
+CREATE TABLE IF NOT EXISTS wishlist_movie (
+    user_id SERIAL REFERENCES movie_user,
+    movie_id int NOT NULL,
+    date_added DATE,
+    UNIQUE(user_id, movie_id),
+    PRIMARY KEY (user_id, movie_id)
+);
+
+CREATE TABLE IF NOT EXISTS producer (
+    producer_id SERIAL PRIMARY KEY,
+    producer_name VARCHAR(64) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS actor (
+    actor_id SERIAL PRIMARY KEY,
+    actor_name VARCHAR(64) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS acts_in (
+    actor_id SERIAL REFERENCES actor,
+    movie_id SERIAL REFERENCES movie,
+    PRIMARY KEY (actor_id, movie_id)
+);
+
+CREATE TABLE IF NOT EXISTS genre (
+    genre_name VARCHAR(32) PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS company_verification_form (
+    form_id SERIAL PRIMARY KEY,
+    user_id SERIAL REFERENCES movie_user,
+    company_id int REFERENCES company,
+    company_name VARCHAR(64),
+    link VARCHAR(64),
+    company_website VARCHAR(64),
+    phone VARCHAR(16),
+    message VARCHAR(256),
+    date TIMESTAMP,
+    status VARCHAR(10)
+);
+
+CREATE TABLE IF NOT EXISTS reviewer_verification_form (
+    form_id SERIAL PRIMARY KEY,
+    user_id SERIAL REFERENCES movie_user,
+    name VARCHAR(64),
+    company_id int REFERENCES company,
+    link VARCHAR(64),
+    message VARCHAR(256),
+    date TIMESTAMP,
+    status VARCHAR(10)
+);
+
+CREATE TABLE IF NOT EXISTS chatbot_answer (
+    answer_id SERIAL PRIMARY KEY,
+    movie_id int NOT NULL,
+    user_id int REFERENCES movie_user,
+    enjoyment BOOLEAN,
+    recommended BOOLEAN,
+    discover VARCHAR(64),
+    platform VARCHAR(64),
+    reason VARCHAR(128),
+    days_since_release int,
+    date TIMESTAMP
+);
